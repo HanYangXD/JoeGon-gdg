@@ -1,19 +1,22 @@
-import base64
 import boto3
-import json
-from datetime import datetime, timedelta, timezone
 
-TEXTRACT = boto3.client("textract")
-RESUME_NAME = "Attorney.pdf"
+# from datetime import datetime, timedelta, timezone
 
-tz_gmt8 = timezone(timedelta(hours=8), name="GMT+8")
-dt_now = datetime.now(tz=tz_gmt8)
-str_now = dt_now.strftime("%Y-%m-%d %H:%M:%S")
+AWS_SESSION = boto3.Session(profile_name="bot-steve", region_name="ap-southeast-1")
+TEXTRACT = AWS_SESSION.client("textract")
 
-with open(f"backend/assets/resumes/{RESUME_NAME}", "rb") as pdf:
-    encoded_pdf = base64.b64encode(pdf.read())
+S3_BUCKET_JOEGON = "gdg-joegon"
+S3_KEY = "resumes/Attorney.pdf"
+# No need end with "/" because it is a folder prefix
+S3_TEXTRACT_OUTPUT_PREFIX = "textract"
 
-textract_result = TEXTRACT.detect_document_text(Document={"Bytes": encoded_pdf})
+# tz_gmt8 = timezone(timedelta(hours=8), name="GMT+8")
+# dt_now = datetime.now(tz=tz_gmt8)
+# str_now = dt_now.strftime("%Y-%m-%d %H:%M:%S")
 
-# Output result into a file
-json.dump(textract_result, fp=open(f"backend/assets/textract/{str_now}.json"))
+textract_result = TEXTRACT.start_document_text_detection(
+    DocumentLocation={"S3Object": {"Bucket": S3_BUCKET_JOEGON, "Name": S3_KEY}},
+    OutputConfig={"S3Bucket": S3_BUCKET_JOEGON, "S3Prefix": S3_TEXTRACT_OUTPUT_PREFIX},
+)
+
+print(textract_result)
