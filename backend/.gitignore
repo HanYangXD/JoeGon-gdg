@@ -1,1 +1,3 @@
 # This is to ignore files under backend directory
+assets/**
+venv/**
