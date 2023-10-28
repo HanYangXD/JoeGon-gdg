@@ -7,6 +7,7 @@ provider:
   stage: ${opt:stage, "dev"}
   region: ${opt:region, "ap-southeast-1"}
   profile: bot-steve
+  deploymentMethod: direct
   deploymentBucket:
     name: gdg-joegon-sls-deployment
 
@@ -17,6 +18,10 @@ provider:
   # HTTP API settings
   httpApi:
     name: gdg-joegon
+
+custom:
+  dev:
+    stageDashPrefix: dev-
 
 package:
   patterns:
@@ -33,3 +38,33 @@ functions:
       - httpApi:
           path: /
           method: GET
+#
+# [WARNING] Uncomment only when working on it! Charge per hour!
+# resources:
+#   Resources:
+#     AosJoegon:
+#       Type: AWS::OpenSearchService::Domain
+#       Properties:
+#         DomainName: aos-${self:custom.${sls:stage}.stageDashPrefix}joegon
+#         EngineVersion: OpenSearch_2.9
+#         ClusterConfig:
+#           InstanceType: t3.small.search
+#           InstanceCount: 1
+#           DedicatedMasterEnabled: false
+#           WarmEnabled: false
+#           MultiAZWithStandbyEnabled: false
+#           ZoneAwarenessEnabled: false
+#         EBSOptions:
+#           EBSEnabled: true
+#           VolumeType: gp3
+#           VolumeSize: 10
+#         AccessPolicies:
+#           Version: "2012-10-17"
+#           Statement:
+#             - Effect: Allow
+#               Principal:
+#                 AWS: ${aws:accountId}
+#               Action:
+#                 - es:*
+#               Resource:
+#                 - arn:aws:es:${aws:region}:${aws:accountId}:domain/aos-${self:custom.${sls:stage}.stageDashPrefix}joegon/*
