@@ -1,6 +1,9 @@
 service: gdg-joegon
 frameworkVersion: "2 || 3"
 
+plugins:
+  - serverless-iam-roles-per-function
+
 provider:
   # Stack settings
   name: aws
@@ -14,12 +17,18 @@ provider:
   # Function settings
   runtime: python3.8
   lambdaHashingVersion: 20201221
+  memorySize: 128
+  timeout: 10
+  logRetentionInDays: 7
 
   # HTTP API settings
   httpApi:
     name: gdg-joegon
 
 custom:
+  shared:
+    s3BucketJoegon: gdg-joegon
+
   dev:
     stageDashPrefix: dev-
 
@@ -38,33 +47,30 @@ functions:
       - httpApi:
           path: /
           method: GET
-#
-# [WARNING] Uncomment only when working on it! Charge per hour!
-# resources:
-#   Resources:
-#     AosJoegon:
-#       Type: AWS::OpenSearchService::Domain
-#       Properties:
-#         DomainName: aos-${self:custom.${sls:stage}.stageDashPrefix}joegon
-#         EngineVersion: OpenSearch_2.9
-#         ClusterConfig:
-#           InstanceType: t3.small.search
-#           InstanceCount: 1
-#           DedicatedMasterEnabled: false
-#           WarmEnabled: false
-#           MultiAZWithStandbyEnabled: false
-#           ZoneAwarenessEnabled: false
-#         EBSOptions:
-#           EBSEnabled: true
-#           VolumeType: gp3
-#           VolumeSize: 10
-#         AccessPolicies:
-#           Version: "2012-10-17"
-#           Statement:
-#             - Effect: Allow
-#               Principal:
-#                 AWS: ${aws:accountId}
-#               Action:
-#                 - es:*
-#               Resource:
-#                 - arn:aws:es:${aws:region}:${aws:accountId}:domain/aos-${self:custom.${sls:stage}.stageDashPrefix}joegon/*
+
+  analyse-pdf:
+    handler: functions/analyse-pdf/main.main
+    package:
+      patterns:
+        - functions/analyse-pdf/**
+    environment:
+      S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
+      # No need end with "/" because it is a folder prefix
+      TEXTRACT_S3_OUTPUT_PREFIX: textract
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - textract:StartDocumentTextDetection
+        Resource: "*"
+      - Effect: Allow
+        Action:
+          - s3:Get*
+          - s3:PutObject
+        Resource: arn:aws:s3:::gdg-joegon/*
+    events:
+      - s3:
+          bucket: ${self:custom.shared.s3BucketJoegon}
+          existing: true
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: resumes/

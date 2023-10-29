@@ -1,22 +1,26 @@
 import boto3
+import json
+import os
+from urllib.parse import unquote_plus
 
-# from datetime import datetime, timedelta, timezone
+TEXTRACT = boto3.client("textract")
 
-AWS_SESSION = boto3.Session(profile_name="bot-steve", region_name="ap-southeast-1")
-TEXTRACT = AWS_SESSION.client("textract")
+S3_BUCKET_JOEGON = os.environ["S3_BUCKET_JOEGON"]
+TEXTRACT_S3_OUTPUT_PREFIX = os.environ["TEXTRACT_S3_OUTPUT_PREFIX"]
 
-S3_BUCKET_JOEGON = "gdg-joegon"
-S3_KEY = "resumes/Attorney.pdf"
-# No need end with "/" because it is a folder prefix
-S3_TEXTRACT_OUTPUT_PREFIX = "textract"
 
-# tz_gmt8 = timezone(timedelta(hours=8), name="GMT+8")
-# dt_now = datetime.now(tz=tz_gmt8)
-# str_now = dt_now.strftime("%Y-%m-%d %H:%M:%S")
+def main(event, context):
+    print(event)
 
-textract_result = TEXTRACT.start_document_text_detection(
-    DocumentLocation={"S3Object": {"Bucket": S3_BUCKET_JOEGON, "Name": S3_KEY}},
-    OutputConfig={"S3Bucket": S3_BUCKET_JOEGON, "S3Prefix": S3_TEXTRACT_OUTPUT_PREFIX},
-)
+    for record in event["Records"]:
+        s3_key = unquote_plus(record["s3"]["object"]["key"])
 
-print(textract_result)
+        textract_result = TEXTRACT.start_document_text_detection(
+            DocumentLocation={"S3Object": {"Bucket": S3_BUCKET_JOEGON, "Name": s3_key}},
+            OutputConfig={
+                "S3Bucket": S3_BUCKET_JOEGON,
+                "S3Prefix": TEXTRACT_S3_OUTPUT_PREFIX,
+            },
+        )
+
+        print(textract_result)

@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "dependencies": {
-    "serverless": "2.72.4"
+    "serverless": "2.72.4",
+    "serverless-iam-roles-per-function": "3.2.0"
   },
   "devDependencies": {},
   "scripts": {
