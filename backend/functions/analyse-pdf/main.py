@@ -1,5 +1,4 @@
 import boto3
-import json
 import os
 from urllib.parse import unquote_plus
 
