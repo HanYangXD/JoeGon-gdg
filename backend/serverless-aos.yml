@@ -1,4 +1,4 @@
-service: gdg-joegon
+service: gdg-joegon-aos
 frameworkVersion: "2 || 3"
 
 provider:
@@ -44,3 +44,13 @@ resources:
                 - es:*
               Resource:
                 - arn:aws:es:${aws:region}:${aws:accountId}:domain/aos-${self:custom.${sls:stage}.stageDashPrefix}joegon/*
+
+  Outputs:
+    AosJoegonArn:
+      Value: !GetAtt AosJoegon.Arn
+      Export:
+        Name: AosJoegonArn
+    AosJoegonEndpoint:
+      Value: !GetAtt AosJoegon.DomainEndpoint
+      Export:
+        Name: AosJoegonEndpoint
