@@ -74,3 +74,28 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: resumes/
+
+  # sync-resumes:
+  #   handler: functions/sync-resumes/main.main
+  #   package:
+  #     patterns:
+  #       - functions/sync-resumes/**
+  #   environment:
+  #     S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
+  #     AOS_JOEGON_ENDPOINT: !ImportValue AosJoegonEndpoint
+  #   iamRoleStatements:
+  #     - Effect: Allow
+  #       Action:
+  #         - s3:GetObject
+  #       Resource: arn:aws:s3:::gdg-joegon/*
+  #     - Effect: Allow
+  #       Action:
+  #         - es:ESHttpPost
+  #       Resource: !Join ["/", [!ImportValue AosJoegonArn, "joegon-candidate/*"]]
+  #   events:
+  #     - s3:
+  #         bucket: ${self:custom.shared.s3BucketJoegon}
+  #         existing: true
+  #         event: s3:ObjectCreated:*
+  #         rules:
+  #           - prefix: textract/
