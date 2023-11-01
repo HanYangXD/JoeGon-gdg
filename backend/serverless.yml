@@ -48,6 +48,16 @@ functions:
           path: /
           method: GET
 
+  upload:
+    handler: functions/upload-pdf/main.generate_presigned_post
+    package:
+      patterns:
+        - functions/upload-pdf/**
+    events:
+      - http:
+          path: upload
+          method: post
+
   analyse-pdf:
     handler: functions/analyse-pdf/main.main
     package:
@@ -74,50 +84,3 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: resumes/
-
-  upload-pdf:
-    handler: functions/upload-pdf/main.main
-    events:
-      - http:
-        path: upload
-        method: post
-        cors: true
-    resources:
-      Resources:
-        FileUploadBucket:
-          Type: AWS::S3::BUCKET
-          Properties:
-            BucketName: gdg-joegon
-
-
-
-
-
-
-  ##################3
-
-  upload-pdf:
-    handler: functions/upload-pdf/main.main
-    package:
-      patterns:
-        - functions/upload-pdf/**
-    environment:
-      S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
-      TEXTRACT_S3_OUTPUT_PREFIX: textract
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - textract:StartDocumentTextDetection
-        Resource: "*"
-      - Effect: Allow
-        Action:
-          - s3:Get*
-          - s3:PutObject
-        Resource: arn:aws:s3:::gdg-joegon/*
-    events:
-      - s3:
-        bucket: ${self:custom.shared.s3BucketJoegon}
-        existing: true
-        event: s3:ObjectCreated:*
-        rules:
-          - prefix: uploaded-resume/

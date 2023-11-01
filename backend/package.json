@@ -8,9 +8,8 @@
   },
   "dependencies": {
     "serverless": "2.72.4",
-    "serverless-iam-roles-per-function": "3.2.0"
+    "serverless-iam-roles-per-function": "^3.2.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
