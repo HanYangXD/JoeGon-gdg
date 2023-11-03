@@ -3,6 +3,7 @@ frameworkVersion: "2 || 3"
 
 plugins:
   - serverless-iam-roles-per-function
+  - serverless-python-requirements
 
 provider:
   # Stack settings
@@ -47,6 +48,16 @@ functions:
       - httpApi:
           path: /
           method: GET
+
+  upload:
+    handler: functions/upload-pdf/main.generate_presigned_post
+    package:
+      patterns:
+        - functions/upload-pdf/**
+    events:
+      - httpApi:
+          path: /upload
+          method: POST
 
   analyse-pdf:
     handler: functions/analyse-pdf/main.main
