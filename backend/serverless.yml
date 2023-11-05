@@ -132,3 +132,14 @@ functions:
       - httpApi:
           path: /resumes/search
           method: POST
+
+  upload:
+    module: functions/upload-pdf
+    handler: main.generate_presigned_post
+    package:
+      patterns:
+        - functions/upload-pdf/**
+    events:
+      - httpApi:
+          path: /upload
+          method: POST
