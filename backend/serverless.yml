@@ -110,3 +110,25 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: textract/
+
+  search-resumes:
+    module: functions/search-resumes
+    handler: main.main
+    package:
+      patterns:
+        - functions/search-resumes/**
+    environment:
+      AOS_JOEGON_ENDPOINT: !ImportValue AosJoegonEndpoint
+      AOS_CANDIDATE_INDEX: ${self:custom.shared.aosIndexJoegonCandidate}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - es:ESHttpPost
+        Resource: !Join
+          - "/"
+          - - !ImportValue AosJoegonArn
+            - ${self:custom.shared.aosIndexJoegonCandidate}/*
+    events:
+      - httpApi:
+          path: /resumes/search
+          method: POST
