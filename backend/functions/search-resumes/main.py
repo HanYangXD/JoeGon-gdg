@@ -44,7 +44,10 @@ def main(event, context):
 
     return {
         "statusCode": 200,
-        "headers": {"content-type": "application/json"},
+        "headers": {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
+        },
         "body": json.dumps(func_response),
     }
 

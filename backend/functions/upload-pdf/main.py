@@ -29,6 +29,7 @@ def main(event, context):
             "statusCode": 200,
             "headers": {
                 "content-type": "application/json",
+                "access-control-allow-origin": "*",
             },
             "body": json.dumps({"URL": presigned_url}),
         }
