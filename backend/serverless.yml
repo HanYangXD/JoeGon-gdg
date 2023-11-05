@@ -25,6 +25,7 @@ provider:
   # HTTP API settings
   httpApi:
     name: gdg-joegon
+    cors: true
 
 custom:
   shared:
@@ -44,15 +45,22 @@ package:
   individually: true
 
 functions:
-  hello:
-    handler: functions/hello/handler.hello
+  upload-pdf:
+    handler: functions/upload-pdf/main.main
     package:
       patterns:
-        - functions/hello/**
+        - functions/upload-pdf/**
+    environment:
+      S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: arn:aws:s3:::gdg-joegon/*
     events:
       - httpApi:
-          path: /
-          method: GET
+          path: /upload
+          method: POST
 
   analyse-pdf:
     handler: functions/analyse-pdf/main.main
@@ -132,21 +140,3 @@ functions:
       - httpApi:
           path: /resumes/search
           method: POST
-
-  upload:
-    module: functions/upload-pdf
-    handler: main.generate_presigned_post
-    package:
-      patterns:
-        - functions/upload-pdf/**
-    events:
-      - httpApi:
-          path: /upload
-          method: POST
-
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          # - s3:GetObject
-          - s3:PutObject
-        Resource: arn:aws:s3:::gdg-joegon/*

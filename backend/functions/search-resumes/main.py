@@ -42,7 +42,11 @@ def main(event, context):
     candidates = [hit["_id"] for hit in search_response["hits"]["hits"]]
     func_response = {"results": candidates}
 
-    return {"statusCode": 200, "body": json.dumps(func_response)}
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": json.dumps(func_response),
+    }
 
 
 def parse_input(input):
