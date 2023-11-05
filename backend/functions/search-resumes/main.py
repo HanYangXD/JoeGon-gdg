@@ -31,7 +31,7 @@ def main(event, context):
         body={
             "query": {
                 "query_string": {
-                    "query": f"resume_content: {input}~",
+                    "query": f"resume_content: {input}",
                 }
             }
         },
@@ -46,9 +46,11 @@ def main(event, context):
 
 
 def parse_input(input):
+    phrases = input.replace("'", '"').split('"')
+
     search_texts = []
 
-    for index, phrase in enumerate(input.split('"')):
+    for index, phrase in enumerate(phrases):
         # When phrase is quoted
         if index % 2 != 0:
             # Take the full phrase after trimming whitespaces
