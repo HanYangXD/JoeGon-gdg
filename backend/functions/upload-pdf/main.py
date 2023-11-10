@@ -4,7 +4,7 @@ def generate_presigned_post(event, context):
     try:
         s3 = boto3.client('s3')        
         bucket_name = "gdg-joegon"
-        object_key = 'resumes' + event['queryStringParameters']['filename'].strip('"\\')  # You can use variables like ${filename} to specify object keys
+        object_key = 'resumes/' + event['queryStringParameters']['filename'].strip('"\\')  # You can use variables like ${filename} to specify object keys
 
         # Generate a pre-signed POST URL valid for 1 hour
         url = s3.generate_presigned_post(
