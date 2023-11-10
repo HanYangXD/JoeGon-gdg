@@ -1,0 +1,27 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+
+@import url('https://fonts.googleapis.com/css2?family=Agbalumo&family=Josefin+Sans:wght@100;200;300;400;500;600;700&display=swap');
+
+.active {
+    color: rgba(17, 148, 224, 0.933);
+}
+
+@layer components {
+  .card_item {
+      min-width: auto;
+      -webkit-box-shadow: -3px -3px 6px 0px rgba(255, 255, 255, 0.3);
+      -moz-box-shadow: -3px -3px 6px 0px rgba(255, 255, 255, 0.3);
+      box-shadow: -3px -3px 6px 0px rgba(255, 255, 255, 0.3);
+      @media (min-width: 1024px) {
+        min-width: 375px;
+      }
+      @media (min-width: 768px) {
+        min-width: 340px;
+      }
+    }
+
+}
