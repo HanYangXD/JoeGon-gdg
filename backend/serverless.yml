@@ -1,0 +1,152 @@
+service: gdg-joegon
+frameworkVersion: "2 || 3"
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-python-requirements
+
+provider:
+  # Stack settings
+  name: aws
+  stage: ${opt:stage, "dev"}
+  region: ${opt:region, "ap-southeast-1"}
+  profile: bot-steve
+  deploymentMethod: direct
+  deploymentBucket:
+    name: gdg-joegon-sls-deployment
+
+  # Function settings
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  memorySize: 128
+  timeout: 10
+  logRetentionInDays: 7
+
+  # HTTP API settings
+  httpApi:
+    name: gdg-joegon
+
+custom:
+  shared:
+    s3BucketJoegon: gdg-joegon
+    aosIndexJoegonCandidate: joegon-candidate
+
+  dev:
+    stageDashPrefix: dev-
+
+  ## serverless-python-requirements settings
+  pythonRequirements:
+    slim: true
+
+package:
+  patterns:
+    - "!./**"
+  individually: true
+
+functions:
+  hello:
+    handler: functions/hello/handler.hello
+    package:
+      patterns:
+        - functions/hello/**
+    events:
+      - httpApi:
+          path: /
+          method: GET
+
+  analyse-pdf:
+    handler: functions/analyse-pdf/main.main
+    package:
+      patterns:
+        - functions/analyse-pdf/**
+    environment:
+      S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
+      # No need end with "/" because it is a folder prefix
+      TEXTRACT_S3_OUTPUT_PREFIX: textract
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - textract:StartDocumentTextDetection
+        Resource: "*"
+      - Effect: Allow
+        Action:
+          - s3:Get*
+          - s3:PutObject
+        Resource: arn:aws:s3:::gdg-joegon/*
+    events:
+      - s3:
+          bucket: ${self:custom.shared.s3BucketJoegon}
+          existing: true
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: resumes/
+
+  sync-resumes:
+    module: functions/sync-resumes
+    handler: main.main
+    package:
+      patterns:
+        - functions/sync-resumes/**
+    environment:
+      S3_BUCKET_JOEGON: ${self:custom.shared.s3BucketJoegon}
+      AOS_JOEGON_ENDPOINT: !ImportValue AosJoegonEndpoint
+      AOS_CANDIDATE_INDEX: ${self:custom.shared.aosIndexJoegonCandidate}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: arn:aws:s3:::gdg-joegon/*
+      - Effect: Allow
+        Action:
+          - es:ESHttpPut
+        Resource: !Join
+          - "/"
+          - - !ImportValue AosJoegonArn
+            - ${self:custom.shared.aosIndexJoegonCandidate}/*
+    events:
+      - s3:
+          bucket: ${self:custom.shared.s3BucketJoegon}
+          existing: true
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: textract/
+
+  search-resumes:
+    module: functions/search-resumes
+    handler: main.main
+    package:
+      patterns:
+        - functions/search-resumes/**
+    environment:
+      AOS_JOEGON_ENDPOINT: !ImportValue AosJoegonEndpoint
+      AOS_CANDIDATE_INDEX: ${self:custom.shared.aosIndexJoegonCandidate}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - es:ESHttpPost
+        Resource: !Join
+          - "/"
+          - - !ImportValue AosJoegonArn
+            - ${self:custom.shared.aosIndexJoegonCandidate}/*
+    events:
+      - httpApi:
+          path: /resumes/search
+          method: POST
+
+  upload:
+    module: functions/upload-pdf
+    handler: main.generate_presigned_post
+    package:
+      patterns:
+        - functions/upload-pdf/**
+    events:
+      - httpApi:
+          path: /upload
+          method: POST
+
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          # - s3:GetObject
+          - s3:PutObject
+        Resource: arn:aws:s3:::gdg-joegon/*

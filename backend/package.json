@@ -1,0 +1,20 @@
+{
+  "name": "gdg-joegon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "serverless": "2.72.4",
+    "serverless-iam-roles-per-function": "3.2.0",
+    "serverless-python-requirements": "6.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
