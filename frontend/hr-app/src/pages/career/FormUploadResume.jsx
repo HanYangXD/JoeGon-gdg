@@ -71,7 +71,8 @@ const UploadResume = () => {
               onClick={onFileNameClick}
               onKeyDown={onFileNameClick}
             >
-              {uploadedFile.name} </span> was selected. <br />Please review once before submit to us!
+              {uploadedFile.name} </span> 
+              <span className="dark:text-white">was selected. <br />Please review once before submit to us!</span>
           </label>
         }
 

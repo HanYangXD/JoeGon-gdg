@@ -53,7 +53,7 @@ export function useAWSSearchCandidateApi(fnConditional, fnCallback, args) {
         fetcherGet,
         {
             revalidateIfStale: false,
-            revalidateOnFocus: false,
+            revalidateOnFocus: true,
             onSuccess: (data, key, config) => {
                 if (data && fnCallback)
                     fnCallback(data);

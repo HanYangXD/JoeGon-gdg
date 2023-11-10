@@ -63,8 +63,8 @@ const CanditateScreening = () => {
   const data = useMemo(() => candidateData, [candidateData]);
 
   const loadSearchKeywordData = useCallback((jsonData) => {
-    // Need to double check the jsonData
     setCandidateData(jsonData);
+    setShouldFetch(false);
   }, []);
 
   const resp = API.useAWSSearchCandidateApi(
@@ -75,6 +75,7 @@ const CanditateScreening = () => {
 
   function handleSearchClick() {
     if (searchKeywordRef.current?.value) {
+      resp.mutate();
       setShouldFetch(true);
       return;
     }
